@@ -40,7 +40,7 @@
             display: flex;
             align-items: center;
             gap: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             z-index: 10;
             position: sticky;
             top: 0;
@@ -54,7 +54,9 @@
             padding: 0 4px;
             line-height: 1;
         }
-        .hamburger:focus { outline: none; }
+        .hamburger:focus {
+            outline: none;
+        }
         .topbar h1 {
             font-size: 1.3rem;
             font-weight: 600;
@@ -73,7 +75,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0, 0, 0, 0.4);
             z-index: 20;
             display: none;
             transition: opacity 0.3s;
@@ -84,11 +86,11 @@
         .drawer {
             position: fixed;
             top: 0;
-            left: calc(-1 * var(--drawer-width));   /* fixed: hidden by default */
+            left: calc(-1 * var(--drawer-width));
             width: var(--drawer-width);
             height: 100%;
             background: var(--card-bg);
-            box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
             z-index: 30;
             transition: left 0.3s ease;
             padding: 20px 0;
@@ -143,7 +145,9 @@
             color: var(--text-muted);
             cursor: pointer;
         }
-        .drawer-close:hover { background: #f5f7fa; }
+        .drawer-close:hover {
+            background: #f5f7fa;
+        }
 
         /* ----- MAIN CONTENT ----- */
         .main-content {
@@ -177,6 +181,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
         .badge {
             font-size: 0.65rem;
@@ -197,7 +202,9 @@
             display: flex;
             flex-direction: column;
         }
-        .field.full { grid-column: 1 / -1; }
+        .field.full {
+            grid-column: 1 / -1;
+        }
         .field label {
             font-size: 0.78rem;
             font-weight: 600;
@@ -248,7 +255,9 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        .btn:hover { background: var(--primary-light); }
+        .btn:hover {
+            background: var(--primary-light);
+        }
         .btn:disabled {
             background: #a0b4c8;
             cursor: not-allowed;
@@ -257,8 +266,12 @@
             font-size: 0.85rem;
             font-weight: 500;
         }
-        #status.ok { color: #1a7a4a; }
-        #status.err { color: #b13e3e; }
+        #status.ok {
+            color: #1a7a4a;
+        }
+        #status.err {
+            color: #b13e3e;
+        }
 
         /* ----- TABLE ----- */
         .table-wrap {
@@ -286,8 +299,12 @@
             text-transform: uppercase;
             letter-spacing: 0.4px;
         }
-        .table-wrap tr:nth-child(even) { background: #f8faff; }
-        .table-wrap tr:hover { background: #eef4fb; }
+        .table-wrap tr:nth-child(even) {
+            background: #f8faff;
+        }
+        .table-wrap tr:hover {
+            background: #eef4fb;
+        }
         .empty-state {
             color: var(--text-muted);
             font-size: 0.85rem;
@@ -302,32 +319,68 @@
             font-family: inherit;
             background: #fafcfe;
             margin-bottom: 8px;
+            min-width: 140px;
         }
 
-        /* ----- EMBED IFRAME ----- */
-        .sheet-frame {
+        /* ----- EMBED IFRAME (full page fit) ----- */
+        .sheet-frame-wrap {
+            position: relative;
             width: 100%;
-            height: 560px;
-            border: 1px solid var(--border);
+            height: 0;
+            padding-bottom: 75%;
+            /* 4:3 ratio — adjust to taste */
+            overflow: hidden;
             border-radius: 8px;
+            border: 1px solid var(--border);
             background: #fafcfe;
+        }
+        .sheet-frame-wrap iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
             display: block;
         }
 
         /* ----- RESPONSIVE ----- */
         @media (max-width: 768px) {
-            .main-content { padding: 12px; }
-            form { grid-template-columns: 1fr; }
-            .field.full { grid-column: 1; }
-            .form-actions { flex-direction: column; align-items: stretch; }
-            .btn { width: 100%; text-align: center; }
-            .sheet-frame { height: 300px; }
-            .topbar h1 { font-size: 1.0rem; }
-            .topbar .sub { display: none; }
-            .drawer { width: 220px; }
+            .main-content {
+                padding: 12px;
+            }
+            form {
+                grid-template-columns: 1fr;
+            }
+            .field.full {
+                grid-column: 1;
+            }
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+            .sheet-frame-wrap {
+                padding-bottom: 100%;
+            }
+            .topbar h1 {
+                font-size: 1.0rem;
+            }
+            .topbar .sub {
+                display: none;
+            }
+            .drawer {
+                width: 220px;
+            }
         }
         @media (min-width: 769px) {
-            .sheet-frame { height: 480px; }
+            .sheet-frame-wrap {
+                padding-bottom: 60%;
+                /* wider view on desktop */
+            }
         }
     </style>
 </head>
@@ -360,18 +413,39 @@
         <!-- VIEW: Add Transaction -->
         <div id="view-add" class="view-section active">
             <div class="card">
-                <div class="card-title"><span>✏️ New Transaction</span><span class="badge">required</span></div>
+                <div class="card-title">
+                    <span>✏️ New Transaction</span>
+                    <span class="badge">required</span>
+                </div>
                 <form id="txnForm">
+                    <!-- Month Selector (new) -->
+                    <div class="field">
+                        <label for="monthSelectAdd">📅 Month (sheet tab)</label>
+                        <select id="monthSelectAdd" class="month-select" required>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
+                    </div>
                     <div class="field">
                         <label for="controlNo">Control No.</label>
                         <input type="text" id="controlNo" placeholder="e.g. 2026-001" required>
                     </div>
                     <div class="field">
-                        <label for="date">Date</label>
+                        <label for="date">Date Received</label>
                         <input type="date" id="date" required>
                     </div>
                     <div class="field">
-                        <label for="received">Received</label>
+                        <label for="received">Received (from)</label>
                         <input type="text" id="received" placeholder="e.g. John Doe" required>
                     </div>
                     <div class="field">
@@ -410,23 +484,35 @@
             </div>
         </div>
 
-        <!-- VIEW: Embedded Sheet -->
+        <!-- VIEW: Embedded Sheet (full page fit) -->
         <div id="view-sheet" class="view-section">
             <div class="card" style="padding:0; border:none; box-shadow:none; background:transparent;">
-                <!-- iframe src will be set by JavaScript -->
-                <iframe id="sheetFrame" class="sheet-frame" src="" title="Google Sheet" loading="lazy"></iframe>
+                <div class="sheet-frame-wrap">
+                    <iframe id="sheetFrame" src="" title="Google Sheet" loading="lazy" allowfullscreen></iframe>
+                </div>
             </div>
         </div>
 
         <!-- VIEW: Recent Entries -->
         <div id="view-recent" class="view-section">
             <div class="card">
-                <div class="card-title"><span>📊 Recent Entries</span><span class="badge" style="background:var(--primary-light);">live</span></div>
-                <select id="monthSelect" class="month-select">
-                    <option>January</option><option>February</option><option>March</option>
-                    <option>April</option><option>May</option><option>June</option>
-                    <option>July</option><option>August</option><option>September</option>
-                    <option>October</option><option>November</option><option>December</option>
+                <div class="card-title">
+                    <span>📊 Recent Entries</span>
+                    <span class="badge" style="background:var(--primary-light);">live</span>
+                </div>
+                <select id="monthSelectRecent" class="month-select">
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
                 </select>
                 <div class="table-wrap" id="tableWrap">
                     <p class="empty-state">Select a month to view entries.</p>
@@ -439,7 +525,9 @@
     <script>
         // ===================== CONFIG =====================
         const CONFIG = {
+            // ⚠️ Replace with your actual Apps Script deployment URL
             APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxZ9hyyIAARTbCQfJtdJtDDTZOzaA92Ekly-xTc-R7pASMVgflvbGBp4JMCwxgKp6autw/exec",
+            // ⚠️ Replace with your actual published sheet embed URL (full page)
             SHEET_EMBED_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQngikkeSs_zBi5__YQAd-CkSyFVWcLs7ctHuhu3gIzY-ZHgOePer_Ztm4KTSHDmXdyU9WiQOOXjOzo/pubhtml?widget=true&headers=false"
         };
         // ==================================================
@@ -458,6 +546,7 @@
                 overlay.classList.add('open');
                 document.body.style.overflow = 'hidden';
             }
+
             function closeDrawer() {
                 drawer.classList.remove('open');
                 overlay.classList.remove('open');
@@ -475,26 +564,22 @@
                 recent: document.getElementById('view-recent')
             };
 
-            // Pre‑load the embedded sheet iframe
+            // Pre‑load the embedded sheet iframe (full page)
             const sheetFrame = document.getElementById('sheetFrame');
             if (sheetFrame && CONFIG.SHEET_EMBED_URL) {
-                // Set src immediately so it loads when the view is shown
                 sheetFrame.src = CONFIG.SHEET_EMBED_URL;
             }
 
             navItems.forEach(item => {
                 item.addEventListener('click', function() {
-                    const view = this.dataset.view; // 'add', 'sheet', 'recent'
-                    // update active nav
+                    const view = this.dataset.view;
                     navItems.forEach(li => li.classList.remove('active'));
                     this.classList.add('active');
-                    // show correct view
                     Object.keys(views).forEach(key => {
                         views[key].classList.toggle('active', key === view);
                     });
                     closeDrawer();
 
-                    // If switching to sheet, ensure iframe has src (already set, but just in case)
                     if (view === 'sheet') {
                         const frame = document.getElementById('sheetFrame');
                         if (frame && !frame.src) {
@@ -502,15 +587,17 @@
                         }
                     }
                     if (view === 'recent') {
-                        const monthSelect = document.getElementById('monthSelect');
+                        const monthSelect = document.getElementById('monthSelectRecent');
                         loadTable(monthSelect ? monthSelect.value : currentMonth());
                     }
                 });
             });
 
             // ---------- HELPERS ----------
-            const MONTHS = ["January","February","March","April","May","June",
-                           "July","August","September","October","November","December"];
+            const MONTHS = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+
             function currentMonth() {
                 return MONTHS[new Date().getMonth()];
             }
@@ -525,20 +612,26 @@
                 return el ? el.value.trim() : '';
             }
 
-            function monthFromDate(dateStr) {
-                if (!dateStr) return currentMonth();
-                const parts = dateStr.split("-");
-                const m = parseInt(parts[1], 10);
-                return MONTHS[m-1] || currentMonth();
+            // Auto-set today's date
+            const dateInput = document.getElementById('date');
+            if (dateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.value = today;
+            }
+
+            // Set default month in the add form to current month
+            const monthSelectAdd = document.getElementById('monthSelectAdd');
+            if (monthSelectAdd) {
+                monthSelectAdd.value = currentMonth();
             }
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                const dateVal = document.getElementById('date')?.value || '';
+                // Gather all fields
                 const payload = {
                     controlNo: getVal('controlNo'),
-                    date: dateVal,
+                    date: getVal('date'),
                     received: getVal('received'),
                     office: getVal('office'),
                     eventSubject: getVal('eventSubject'),
@@ -546,13 +639,25 @@
                     officerInCharge: getVal('officerInCharge'),
                     classification: document.getElementById('classification')?.value || 'simple',
                     remarks: getVal('remarks'),
-                    sheetName: monthFromDate(dateVal)
+                    // Use the selected month from the dropdown
+                    sheetName: monthSelectAdd ? monthSelectAdd.value : currentMonth()
                 };
 
-                if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
-                    statusEl.textContent = "⚠️ Set your Apps Script URL in CONFIG.";
+                // Validate required fields
+                if (!payload.controlNo || !payload.date || !payload.received || !payload.office ||
+                    !payload.eventSubject || !payload.officerInCharge) {
+                    statusEl.textContent = "⚠️ Please fill in all required fields.";
                     statusEl.className = "err";
                     return;
+                }
+
+                if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR") || CONFIG.APPS_SCRIPT_URL.includes(
+                        "script.google.com/macros/s/AKfycbxZ9hyyIAARTbCQfJtdJtDDTZOzaA92Ekly-xTc-R7pASMVgflvbGBp4JMCwxgKp6autw/exec") &&
+                    CONFIG.APPS_SCRIPT_URL.includes("AKfycbxZ9hyyIAARTbCQfJtdJtDDTZOzaA92Ekly-xTc-R7pASMVgflvbGBp4JMCwxgKp6autw")
+                    ) {
+                    // This is the example URL — warn the user to replace it.
+                    // We'll still attempt the fetch, but it will likely fail.
+                    console.warn("Using example Apps Script URL — please replace with your own deployment.");
                 }
 
                 submitBtn.disabled = true;
@@ -567,13 +672,21 @@
                     });
                     const result = await res.json();
                     if (result.status === "success") {
-                        statusEl.textContent = `✅ Saved to ${result.sheet}!`;
+                        statusEl.textContent = `✅ Saved to "${result.sheet}"!`;
                         statusEl.className = "ok";
                         form.reset();
+                        // Re-set default date and month after reset
+                        if (dateInput) {
+                            const today = new Date().toISOString().split('T')[0];
+                            dateInput.value = today;
+                        }
+                        if (monthSelectAdd) {
+                            monthSelectAdd.value = currentMonth();
+                        }
                         // Refresh recent entries if that view is active
                         const activeView = document.querySelector('.drawer-nav li.active');
                         if (activeView && activeView.dataset.view === 'recent') {
-                            const monthSelect = document.getElementById('monthSelect');
+                            const monthSelect = document.getElementById('monthSelectRecent');
                             loadTable(monthSelect ? monthSelect.value : currentMonth());
                         }
                     } else {
@@ -588,39 +701,86 @@
             });
 
             // ---------- RECENT ENTRIES ----------
-            const monthSelect = document.getElementById('monthSelect');
+            const monthSelectRecent = document.getElementById('monthSelectRecent');
             const tableWrap = document.getElementById('tableWrap');
 
+            // These headers must match the spreadsheet EXACTLY (case-sensitive)
+            const SPREADSHEET_HEADERS = [
+                "Control No.",
+                "DATE RECEIVED",
+                "RECEIVED",
+                "OFFICE",
+                "EVENT/SUBJECT",
+                "DATE OF EVENT/DATE ACCOMPLISHED",
+                "OFFICER IN CHARGE",
+                "CLASSIFICATION (simple,complex,HT)",
+                "REMARKS"
+            ];
+
             async function loadTable(monthName) {
-                if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) return;
                 if (!tableWrap) return;
+                if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR") || CONFIG.APPS_SCRIPT_URL.includes(
+                        "script.google.com/macros/s/AKfycbxZ9hyyIAARTbCQfJtdJtDDTZOzaA92Ekly-xTc-R7pASMVgflvbGBp4JMCwxgKp6autw")
+                    ) {
+                    tableWrap.innerHTML =
+                        `<p class="empty-state">⚠️ Please set your actual Apps Script URL in CONFIG.</p>`;
+                    return;
+                }
                 try {
-                    const url = `${CONFIG.APPS_SCRIPT_URL}?sheet=${encodeURIComponent(monthName)}`;
+                    const url =
+                        `${CONFIG.APPS_SCRIPT_URL}?sheet=${encodeURIComponent(monthName)}&t=${Date.now()}`;
                     const res = await fetch(url);
                     const rows = await res.json();
+
                     if (!Array.isArray(rows) || rows.length === 0) {
-                        tableWrap.innerHTML = `<p class="empty-state">No entries in ${monthName}.</p>`;
+                        tableWrap.innerHTML = `<p class="empty-state">📭 No entries in <strong>${monthName}</strong>.</p>`;
                         return;
                     }
-                    const headers = ["Control No.", "Date", "Received", "Office", "Event/Subject",
-                                     "Date of Event", "Officer in Charge", "Classification", "Remarks"];
-                    let html = `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>`;
-                    rows.slice().reverse().forEach(r => {
-                        html += "<tr>" + r.map(c => `<td>${c ?? ""}</td>`).join("") + "</tr>";
+
+                    // Build table with the exact spreadsheet headers
+                    let html = `<table><thead><tr>`;
+                    SPREADSHEET_HEADERS.forEach(h => {
+                        html += `<th>${h}</th>`;
                     });
-                    html += "</tbody></table>";
+                    html += `</tr></thead><tbody>`;
+
+                    // Show newest first (reverse order)
+                    const reversed = rows.slice().reverse();
+                    reversed.forEach(row => {
+                        // Ensure we have exactly as many cells as headers
+                        const cells = Array.isArray(row) ? row : [];
+                        // Pad or trim to match header count
+                        while (cells.length < SPREADSHEET_HEADERS.length) {
+                            cells.push('');
+                        }
+                        html += `<tr>`;
+                        for (let i = 0; i < SPREADSHEET_HEADERS.length; i++) {
+                            html += `<td>${cells[i] ?? ''}</td>`;
+                        }
+                        html += `</tr>`;
+                    });
+
+                    html += `</tbody></table>`;
                     tableWrap.innerHTML = html;
                 } catch (err) {
-                    tableWrap.innerHTML = `<p class="empty-state" style="color:#b13e3e;">Error: ${err.message}</p>`;
+                    tableWrap.innerHTML =
+                        `<p class="empty-state" style="color:#b13e3e;">❌ Error loading data: ${err.message}</p>`;
                 }
             }
 
-            if (monthSelect) {
-                monthSelect.value = currentMonth();
-                monthSelect.addEventListener('change', (e) => loadTable(e.target.value));
-                // Load initial data for the current month (recent view may be inactive, but data will be ready)
-                loadTable(monthSelect.value);
+            if (monthSelectRecent) {
+                monthSelectRecent.value = currentMonth();
+                monthSelectRecent.addEventListener('change', (e) => loadTable(e.target.value));
+                // Load initial data
+                loadTable(monthSelectRecent.value);
             }
+
+            // ---------- KEYBOARD SHORTCUT: ESC to close drawer ----------
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && drawer.classList.contains('open')) {
+                    closeDrawer();
+                }
+            });
 
         });
     </script>
