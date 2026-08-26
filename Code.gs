@@ -1,44 +1,33 @@
 /**
  * Apps Script backend for the Transaction Receiving Log.
- * HEADERS order:
- * Control No. | Date | Received | Office | Event/Subject | Date of Event | Officer in Charge | Classification | Remarks
- * Each monthly tab must have these headers in Row 1.
+ * Routes each entry to the sheet tab matching its month
+ * (tabs must be named exactly: January, February, March, ... December).
+ *
+ * Each monthly tab must have this header row in Row 1:
+ * Tracking Code | Date | Receiving Office | Subject | Date Transmitted | Remarks
  */
 
-const HEADERS = [
-  "Control No.",
-  "Date",
-  "Received",
-  "Office",
-  "Event/Subject",
-  "Date of Event",
-  "Officer in Charge",
-  "Classification",
-  "Remarks"
-];
+const HEADERS = ["Tracking Code", "Date", "Receiving Office", "Subject", "Date Transmitted", "Remarks"];
 
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-    const sheetName = data.sheetName; // e.g. "January"
+    const sheetName = data.sheetName; // e.g. "January" — sent by the page
     const sheet = getOrCreateSheet(sheetName);
 
-    // Append in exactly the HEADERS order
     sheet.appendRow([
-      data.controlNo || "",
+      data.trackingCode || "",
       data.date || "",
-      data.received || "",
-      data.office || "",
-      data.eventSubject || "",
-      data.dateOfEvent || "",
-      data.officerInCharge || "",
-      data.classification || "",
+      data.receivingOffice || "",
+      data.subject || "",
+      data.dateTransmitted || "",
       data.remarks || ""
     ]);
 
     return ContentService
       .createTextOutput(JSON.stringify({ status: "success", sheet: sheetName }))
       .setMimeType(ContentService.MimeType.JSON);
+
   } catch (err) {
     return ContentService
       .createTextOutput(JSON.stringify({ status: "error", message: err.message }))
@@ -48,7 +37,8 @@ function doPost(e) {
 
 function doGet(e) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const requestedSheet = e.parameter.sheet;
+  const requestedSheet = e.parameter.sheet; // e.g. ?sheet=February
+
   const sheetName = requestedSheet || currentMonthName();
   const sheet = ss.getSheetByName(sheetName);
 
@@ -59,25 +49,10 @@ function doGet(e) {
   }
 
   const values = sheet.getDataRange().getValues();
-  // Drop the header row (first row)
-  const rows = values.slice(1);
-
-  // Format each row to ensure dates are clean strings
-  const formattedRows = rows.map(row => {
-    return row.map(cell => {
-      if (cell instanceof Date) {
-        // Format as YYYY-MM-DD
-        const year = cell.getFullYear();
-        const month = String(cell.getMonth() + 1).padStart(2, '0');
-        const day = String(cell.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      }
-      return cell;
-    });
-  });
+  const rows = values.slice(1); // drop header row
 
   return ContentService
-    .createTextOutput(JSON.stringify(formattedRows))
+    .createTextOutput(JSON.stringify(rows))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -86,18 +61,17 @@ function doGet(e) {
 function getOrCreateSheet(sheetName) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getSheetByName(sheetName);
+
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
     sheet.appendRow(HEADERS);
     sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
-    // Optionally format the whole sheet as plain text to avoid automatic date conversion
-    // but not necessary if we send strings.
   }
   return sheet;
 }
 
 function currentMonthName() {
   const months = ["January","February","March","April","May","June",
-                  "July","August","September","October","November","December"];
+                   "July","August","September","October","November","December"];
   return months[new Date().getMonth()];
 }
