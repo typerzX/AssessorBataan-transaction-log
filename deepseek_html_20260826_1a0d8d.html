@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Receiving Log</title>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2a4a7a;
+            --accent: #006ea1;
+            --accent-hover: #0088c7;
+            --bg: #eef2f7;
+            --card-bg: #ffffff;
+            --border: #d0d9e5;
+            --text: #1a2634;
+            --text-muted: #4a5a6e;
+            --banner-bg: #e3edf5;
+            --banner-border: #7fa9c9;
+            --table-header-bg: #e8eef6;
+            --shadow: 0 2px 8px rgba(30, 58, 95, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--bg);
+            padding: 20px;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ---- Header ---- */
+        .page-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            margin-bottom: 6px;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.3px;
+        }
+
+        .page-header .sub {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .header-line {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* ---- Setup Banner ---- */
+        .setup-banner {
+            background: var(--banner-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 6px;
+            padding: 12px 18px;
+            font-size: 0.82rem;
+            color: var(--text);
+            margin: 12px 0 22px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .setup-banner strong {
+            color: var(--primary);
+        }
+
+        .setup-banner code {
+            background: rgba(0, 110, 161, 0.12);
+            padding: 1px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ---- Main Grid (auto-orient) ---- */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        /* ---- Cards ---- */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(30, 58, 95, 0.10);
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title .badge {
+            font-size: 0.65rem;
+            font-weight: 500;
+            background: var(--accent);
+            color: #fff;
+            padding: 0 10px;
+            border-radius: 20px;
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+
+        /* ---- Form ---- */
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 20px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .field input,
+        .field textarea {
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: #fafcfe;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 110, 161, 0.15);
+            background: #fff;
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 56px;
+        }
+
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            letter-spacing: 0.2px;
+        }
+
+        .btn:hover {
+            background: var(--primary-light);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn:disabled {
+            background: #a0b4c8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #status {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        #status.ok {
+            color: #1a7a4a;
+        }
+
+        #status.err {
+            color: #b13e3e;
+        }
+
+        /* ---- Table ---- */
+        .table-wrap {
+            overflow-x: auto;
+            margin-top: 2px;
+        }
+
+        .table-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            min-width: 480px;
+        }
+
+        .table-wrap th,
+        .table-wrap td {
+            border: 1px solid var(--border);
+            padding: 7px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .table-wrap th {
+            background: var(--table-header-bg);
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .table-wrap tr:nth-child(even) {
+            background: #f8faff;
+        }
+
+        .table-wrap tr:hover {
+            background: #eef4fb;
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 12px 0 4px 0;
+        }
+
+        /* ---- Embedded Sheet ---- */
+        .sheet-frame {
+            width: 100%;
+            height: 560px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fafcfe;
+            display: block;
+        }
+
+        .sheet-placeholder {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        /* ============================================================
+                   LANDSCAPE / PC MODE — sheet moves to the right
+                   ============================================================ */
+        @media (min-width: 1024px) {
+            body {
+                padding: 28px 32px;
+            }
+
+            .main-grid {
+                grid-template-columns: 1.4fr 1fr;
+                gap: 24px;
+            }
+
+            /* left column: form + log stacked */
+            .left-col {
+                display: flex;
+                flex-direction: column;
+                gap: 22px;
+            }
+
+            /* right column: sheet only */
+            .right-col {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .right-col .card {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .right-col .card .card-title {
+                flex-shrink: 0;
+            }
+
+            .right-col .sheet-frame {
+                flex: 1;
+                min-height: 420px;
+                height: auto;
+            }
+
+            /* Make form more compact in landscape */
+            .card {
+                padding: 18px 22px;
+            }
+
+            form {
+                gap: 12px 18px;
+            }
+
+            .page-header h1 {
+                font-size: 1.6rem;
+            }
+        }
+
+        /* ---- Extra large screens: more breathing ---- */
+        @media (min-width: 1400px) {
+            .main-grid {
+                grid-template-columns: 1.5fr 1fr;
+                gap: 28px;
+            }
+
+            .card {
+                padding: 24px 30px;
+            }
+
+            .sheet-frame {
+                min-height: 480px;
+            }
+        }
+
+        /* ---- Portrait / small screens: stack everything ---- */
+        @media (max-width: 1023px) {
+            .left-col,
+            .right-col {
+                display: contents;
+            }
+
+            .sheet-frame {
+                height: 420px;
+            }
+
+            .card {
+                padding: 16px 18px;
+            }
+
+            form {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .field.full {
+                grid-column: 1;
+            }
+
+            .form-actions {
+                grid-column: 1;
+                flex-wrap: wrap;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-header h1 {
+                font-size: 1.25rem;
+            }
+
+            .setup-banner {
+                font-size: 0.78rem;
+                padding: 10px 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 14px 14px;
+            }
+
+            .sheet-frame {
+                height: 300px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #status {
+                text-align: center;
+                padding: 4px 0;
+            }
+        }
+
+        /* ---- Misc utilities ---- */
+        .mt-1 {
+            margin-top: 6px;
+        }
+
+        .flex-grow {
+            flex: 1;
+        }
+
+        .gap-2 {
+            gap: 8px;
+        }
+
+        /* small dot accent */
+        .accent-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+
+        <!-- HEADER -->
+        <div class="page-header">
+            <div>
+                <h1>📋 Transaction Receiving Log</h1>
+                <span class="sub">Log incoming transactions · each submission adds a row to your Google Sheet</span>
+            </div>
+            <div class="header-line">
+                <span style="font-size:0.75rem;color:var(--text-muted);background:var(--table-header-bg);padding:2px 12px;border-radius:20px;font-weight:500;">
+                    <span class="accent-dot"></span> Live
+                </span>
+            </div>
+        </div>
+
+        <!-- SETUP BANNER -->
+        <div class="setup-banner">
+            <span style="font-size:1.1rem;">⚙️</span>
+            <span><strong>Before this works:</strong> paste your Apps Script Web App URL and Sheet embed URL into the <code>CONFIG</code> block near the top of the &lt;script&gt; section. See setup steps in chat.</span>
+        </div>
+
+        <!-- MAIN GRID: auto-orients in landscape -->
+        <div class="main-grid">
+
+            <!-- LEFT COLUMN: Form + Log Table -->
+            <div class="left-col">
+
+                <!-- FORM CARD -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>✏️ New Transaction</span>
+                        <span class="badge">required</span>
+                    </div>
+                    <form id="txnForm">
+                        <div class="field">
+                            <label for="trackingCode">Tracking Code</label>
+                            <input type="text" id="trackingCode" placeholder="e.g. TC-2026-0001" required>
+                        </div>
+                        <div class="field">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="field">
+                            <label for="receivingOffice">Receiving Office</label>
+                            <input type="text" id="receivingOffice" placeholder="e.g. Records Section" required>
+                        </div>
+                        <div class="field">
+                            <label for="dateTransmitted">Date Transmitted</label>
+                            <input type="date" id="dateTransmitted">
+                        </div>
+                        <div class="field full">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" placeholder="Brief description of the document / transaction" required>
+                        </div>
+                        <div class="field full">
+                            <label for="remarks">Remarks</label>
+                            <textarea id="remarks" placeholder="Optional notes"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn" id="submitBtn">Submit Transaction</button>
+                            <span id="status"></span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- LOG TABLE CARD -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>📊 Recent Entries</span>
+                        <span class="badge" style="background:var(--primary-light);">live</span>
+                    </div>
+                    <div class="table-wrap" id="tableWrap">
+                        <p class="empty-state">Recent entries will appear here once configured.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Embedded Sheet (moves to right in landscape) -->
+            <div class="right-col">
+                <div class="card" style="display:flex;flex-direction:column;">
+                    <div class="card-title">
+                        <span>📄 Google Sheet</span>
+                        <span class="badge" style="background:var(--accent);">embedded</span>
+                    </div>
+                    <iframe id="sheetFrame" class="sheet-frame" src="" title="Google Sheet Embed" loading="lazy"></iframe>
+                </div>
+            </div>
+
+        </div><!-- /main-grid -->
+
+    </div><!-- /wrap -->
+
+    <script>
+        // ===================== CONFIG — EDIT THESE TWO LINES =====================
+        const CONFIG = {
+            // The /exec URL you get after deploying the Apps Script as a Web App
+            APPS_SCRIPT_URL: "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE",
+
+            // Your Google Sheet's "publish to web" embed URL (File > Share > Publish to web > Embed)
+            SHEET_EMBED_URL: "<iframe width="402" height="346" frameborder="0" scrolling="no" src="https://1drv.ms/x/c/8dbdc32edd8389e2/IQQRwv4aY6afQ47bMiM_6vOuAV4IW4QSqUHhI02WML7Zdo0?em=2&wdAllowInteractivity=False&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True&waccluster=PSG4&edaebp=&edaebf=res50"></iframe>"
+        };
+        // ===========================================================================
+
+        // Set iframe src
+        document.getElementById('sheetFrame').src = CONFIG.SHEET_EMBED_URL;
+
+        const form = document.getElementById('txnForm');
+        const statusEl = document.getElementById('status');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // ---- Submit handler ----
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                trackingCode: document.getElementById('trackingCode').value.trim(),
+                date: document.getElementById('date').value,
+                receivingOffice: document.getElementById('receivingOffice').value.trim(),
+                subject: document.getElementById('subject').value.trim(),
+                dateTransmitted: document.getElementById('dateTransmitted').value,
+                remarks: document.getElementById('remarks').value.trim()
+            };
+
+            if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
+                statusEl.textContent = "⚠️ Set your Apps Script URL in the CONFIG block.";
+                statusEl.className = "err";
+                return;
+            }
+
+            submitBtn.disabled = true;
+            statusEl.textContent = "Saving…";
+            statusEl.className = "";
+
+            try {
+                const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+
+                if (result.status === "success") {
+                    statusEl.textContent = "✅ Saved successfully!";
+                    statusEl.className = "ok";
+                    form.reset();
+                    loadTable();
+                } else {
+                    throw new Error(result.message || "Unknown error");
+                }
+            } catch (err) {
+                statusEl.textContent = "❌ Failed: " + err.message;
+                statusEl.className = "err";
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        // ---- Load table data ----
+        async function loadTable() {
+            if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) return;
+            const wrap = document.getElementById('tableWrap');
+            try {
+                const res = await fetch(CONFIG.APPS_SCRIPT_URL);
+                const rows = await res.json();
+                if (!Array.isArray(rows) || rows.length === 0) {
+                    wrap.innerHTML = `<p class="empty-state">No entries yet.</p>`;
+                    return;
+                }
+                const headers = ["Tracking Code", "Date", "Receiving Office", "Subject", "Date Transmitted", "Remarks"];
+                let html = `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>`;
+                // show most recent first
+                rows.slice().reverse().forEach(r => {
+                    html += "<tr>" + r.map(c => `<td>${c ?? ""}</td>`).join("") + "</tr>";
+                });
+                html += "</tbody></table>";
+                wrap.innerHTML = html;
+            } catch (err) {
+                wrap.innerHTML = `<p class="empty-state" style="color:#b13e3e;">Could not load log: ${err.message}</p>`;
+            }
+        }
+
+        // Initial load
+        loadTable();
+
+        // ---- Auto-refresh every 30s if configured ----
+        if (!CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
+            setInterval(loadTable, 30000);
+        }
+    </script>
+
+</body>
+</html>
