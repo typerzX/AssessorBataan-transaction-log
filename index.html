@@ -566,32 +566,39 @@
     <script>
         // ===================== CONFIG — EDIT THESE TWO LINES =====================
         const CONFIG = {
-            // The /exec URL you get after deploying the Apps Script as a Web App
             APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxJcvnq7JTa7wfWUfwVg8q4TgkfaacDSSETLiftTwL9kKxrJ7CDBtszwg5lssFS0ZEkhg/exec",
-
-            // Your Google Sheet's "publish to web" embed URL (File > Share > Publish to web > Embed)
-            SHEET_EMBED_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQngikkeSs_zBi5__YQAd-CkSyFVWcLs7ctHuhu3gIzY-ZHgOePer_Ztm4KTSHDmXdyU9WiQOOXjOzo/pubhtml?widget=true&amp;headers=false"
+            SHEET_EMBED_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQngikkeSs_zBi5__YQAd-CkSyFVWcLs7ctHuhu3gIzY-ZHgOePer_Ztm4KTSHDmXdyU9WiQOOXjOzo/pubhtml?widget=true&headers=false"
         };
         // ===========================================================================
 
-        // Set iframe src
+        const MONTHS = ["January","February","March","April","May","June",
+                         "July","August","September","October","November","December"];
+
         document.getElementById('sheetFrame').src = CONFIG.SHEET_EMBED_URL;
 
         const form = document.getElementById('txnForm');
         const statusEl = document.getElementById('status');
         const submitBtn = document.getElementById('submitBtn');
 
-        // ---- Submit handler ----
+        // Turn a yyyy-mm-dd date string into "January", "February", etc.
+        function monthNameFromDate(dateStr) {
+            if (!dateStr) return MONTHS[new Date().getMonth()]; // fallback: current month
+            const [year, month] = dateStr.split("-");
+            return MONTHS[parseInt(month, 10) - 1];
+        }
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const dateVal = document.getElementById('date').value;
             const payload = {
                 trackingCode: document.getElementById('trackingCode').value.trim(),
-                date: document.getElementById('date').value,
+                date: dateVal,
                 receivingOffice: document.getElementById('receivingOffice').value.trim(),
                 subject: document.getElementById('subject').value.trim(),
                 dateTransmitted: document.getElementById('dateTransmitted').value,
-                remarks: document.getElementById('remarks').value.trim()
+                remarks: document.getElementById('remarks').value.trim(),
+                sheetName: monthNameFromDate(dateVal) // <-- routes to the right tab
             };
 
             if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
@@ -613,10 +620,10 @@
                 const result = await res.json();
 
                 if (result.status === "success") {
-                    statusEl.textContent = "✅ Saved successfully!";
+                    statusEl.textContent = `✅ Saved to ${result.sheet}!`;
                     statusEl.className = "ok";
                     form.reset();
-                    loadTable();
+                    loadTable(document.getElementById('monthSelect').value);
                 } else {
                     throw new Error(result.message || "Unknown error");
                 }
@@ -628,20 +635,19 @@
             }
         });
 
-        // ---- Load table data ----
-        async function loadTable() {
+        async function loadTable(monthName) {
             if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) return;
             const wrap = document.getElementById('tableWrap');
             try {
-                const res = await fetch(CONFIG.APPS_SCRIPT_URL);
+                const url = `${CONFIG.APPS_SCRIPT_URL}?sheet=${encodeURIComponent(monthName)}`;
+                const res = await fetch(url);
                 const rows = await res.json();
                 if (!Array.isArray(rows) || rows.length === 0) {
-                    wrap.innerHTML = `<p class="empty-state">No entries yet.</p>`;
+                    wrap.innerHTML = `<p class="empty-state">No entries yet in ${monthName}.</p>`;
                     return;
                 }
                 const headers = ["Tracking Code", "Date", "Receiving Office", "Subject", "Date Transmitted", "Remarks"];
                 let html = `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>`;
-                // show most recent first
                 rows.slice().reverse().forEach(r => {
                     html += "<tr>" + r.map(c => `<td>${c ?? ""}</td>`).join("") + "</tr>";
                 });
@@ -652,13 +658,15 @@
             }
         }
 
-        // Initial load
-        loadTable();
+        // Month picker for viewing the table
+        document.getElementById('monthSelect').addEventListener('change', (e) => {
+            loadTable(e.target.value);
+        });
 
-        // ---- Auto-refresh every 30s if configured ----
-        if (!CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
-            setInterval(loadTable, 30000);
-        }
+        // Initial load: show current month
+        const currentMonth = MONTHS[new Date().getMonth()];
+        document.getElementById('monthSelect').value = currentMonth;
+        loadTable(currentMonth);
     </script>
 
 </body>
