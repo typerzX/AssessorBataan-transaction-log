@@ -84,7 +84,7 @@
         .drawer {
             position: fixed;
             top: 0;
-            left: -var(--drawer-width);
+            left: calc(-1 * var(--drawer-width));   /* fixed: hidden by default */
             width: var(--drawer-width);
             height: 100%;
             background: var(--card-bg);
@@ -413,6 +413,7 @@
         <!-- VIEW: Embedded Sheet -->
         <div id="view-sheet" class="view-section">
             <div class="card" style="padding:0; border:none; box-shadow:none; background:transparent;">
+                <!-- iframe src will be set by JavaScript -->
                 <iframe id="sheetFrame" class="sheet-frame" src="" title="Google Sheet" loading="lazy"></iframe>
             </div>
         </div>
@@ -474,6 +475,13 @@
                 recent: document.getElementById('view-recent')
             };
 
+            // Pre‑load the embedded sheet iframe
+            const sheetFrame = document.getElementById('sheetFrame');
+            if (sheetFrame && CONFIG.SHEET_EMBED_URL) {
+                // Set src immediately so it loads when the view is shown
+                sheetFrame.src = CONFIG.SHEET_EMBED_URL;
+            }
+
             navItems.forEach(item => {
                 item.addEventListener('click', function() {
                     const view = this.dataset.view; // 'add', 'sheet', 'recent'
@@ -486,7 +494,7 @@
                     });
                     closeDrawer();
 
-                    // if switching to sheet, reload iframe (optional)
+                    // If switching to sheet, ensure iframe has src (already set, but just in case)
                     if (view === 'sheet') {
                         const frame = document.getElementById('sheetFrame');
                         if (frame && !frame.src) {
@@ -505,12 +513,6 @@
                            "July","August","September","October","November","December"];
             function currentMonth() {
                 return MONTHS[new Date().getMonth()];
-            }
-
-            // ---------- SETUP EMBED ----------
-            const sheetFrame = document.getElementById('sheetFrame');
-            if (sheetFrame && CONFIG.SHEET_EMBED_URL) {
-                // We'll load it when the view is first shown (lazy)
             }
 
             // ---------- FORM SUBMISSION ----------
@@ -616,17 +618,9 @@
             if (monthSelect) {
                 monthSelect.value = currentMonth();
                 monthSelect.addEventListener('change', (e) => loadTable(e.target.value));
-                // load initial if recent view is active on load
+                // Load initial data for the current month (recent view may be inactive, but data will be ready)
                 loadTable(monthSelect.value);
             }
-
-            // Also load if recent view is shown later via nav
-            // (already handled in nav click)
-
-            // Pre‑load sheet iframe when the sheet view is first shown (lazy)
-            // It will be loaded on click.
-
-            // If the default view is 'add', we do nothing else.
 
         });
     </script>
