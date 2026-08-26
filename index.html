@@ -1,120 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Transaction Receiving Log</title>
     <style>
-        :root {
-            --primary: #1e3a5f;
-            --primary-light: #2a4a7a;
-            --accent: #006ea1;
-            --accent-hover: #0088c7;
-            --bg: #eef2f7;
-            --card-bg: #ffffff;
-            --border: #d0d9e5;
-            --text: #1a2634;
-            --text-muted: #4a5a6e;
-            --banner-bg: #e3edf5;
-            --banner-border: #7fa9c9;
-            --table-header-bg: #e8eef6;
-            --shadow: 0 2px 8px rgba(30, 58, 95, 0.08);
-        }
-
+        /* ----- RESET & VARIABLES ----- */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2a4a7a;
+            --accent: #006ea1;
+            --bg: #eef2f7;
+            --card-bg: #ffffff;
+            --border: #d0d9e5;
+            --text: #1a2634;
+            --text-muted: #4a5a6e;
+            --shadow: 0 2px 8px rgba(30, 58, 95, 0.08);
+            --drawer-width: 260px;
+        }
         body {
             font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
             background: var(--bg);
-            padding: 20px;
             color: var(--text);
             min-height: 100vh;
-        }
-
-        .wrap {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .page-header {
             display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 8px 16px;
-            margin-bottom: 6px;
+            flex-direction: column;
         }
 
-        .page-header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: -0.3px;
-        }
-
-        .page-header .sub {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .header-line {
+        /* ----- TOP BAR (with hamburger) ----- */
+        .topbar {
+            background: var(--primary);
+            color: #fff;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             gap: 16px;
-            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 10;
+            position: sticky;
+            top: 0;
+        }
+        .hamburger {
+            font-size: 28px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #fff;
+            padding: 0 4px;
+            line-height: 1;
+        }
+        .hamburger:focus { outline: none; }
+        .topbar h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        .topbar .sub {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-left: auto;
         }
 
-        .setup-banner {
-            background: var(--banner-bg);
-            border-left: 4px solid var(--accent);
-            border-radius: 6px;
-            padding: 12px 18px;
-            font-size: 0.82rem;
-            color: var(--text);
-            margin: 12px 0 22px 0;
+        /* ----- DRAWER (overlay) ----- */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 20;
+            display: none;
+            transition: opacity 0.3s;
+        }
+        .drawer-overlay.open {
+            display: block;
+        }
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: calc(-1 * var(--drawer-width));   /* fixed: hidden by default */
+            width: var(--drawer-width);
+            height: 100%;
+            background: var(--card-bg);
+            box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+            z-index: 30;
+            transition: left 0.3s ease;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .drawer.open {
+            left: 0;
+        }
+        .drawer-header {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        .drawer-nav {
+            list-style: none;
+            padding: 16px 0;
+            flex: 1;
+        }
+        .drawer-nav li {
+            padding: 12px 24px;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: var(--text);
+            transition: background 0.15s;
+            border-left: 3px solid transparent;
         }
-
-        .setup-banner strong {
-            color: var(--primary);
+        .drawer-nav li:hover {
+            background: #eef4fb;
         }
-
-        .setup-banner code {
-            background: rgba(0, 110, 161, 0.12);
-            padding: 1px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+        .drawer-nav li.active {
+            background: #e3edf5;
+            border-left-color: var(--accent);
             color: var(--accent);
             font-weight: 600;
         }
+        .drawer-nav li .icon {
+            font-size: 1.2rem;
+            width: 28px;
+            text-align: center;
+        }
+        .drawer-close {
+            margin-top: auto;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .drawer-close:hover { background: #f5f7fa; }
 
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 22px;
-            align-items: start;
+        /* ----- MAIN CONTENT ----- */
+        .main-content {
+            flex: 1;
+            padding: 20px 24px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .view-section {
+            display: none;
+        }
+        .view-section.active {
+            display: block;
         }
 
+        /* ----- CARDS & FORM (shared) ----- */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 20px 24px;
             box-shadow: var(--shadow);
-            transition: box-shadow 0.2s;
+            margin-bottom: 24px;
         }
-
-        .card:hover {
-            box-shadow: 0 4px 16px rgba(30, 58, 95, 0.10);
-        }
-
         .card-title {
             font-size: 1.05rem;
             font-weight: 600;
@@ -124,8 +178,7 @@
             align-items: center;
             gap: 8px;
         }
-
-        .card-title .badge {
+        .badge {
             font-size: 0.65rem;
             font-weight: 500;
             background: var(--accent);
@@ -133,7 +186,6 @@
             padding: 0 10px;
             border-radius: 20px;
             line-height: 1.6;
-            letter-spacing: 0.3px;
         }
 
         form {
@@ -141,16 +193,11 @@
             grid-template-columns: 1fr 1fr;
             gap: 14px 20px;
         }
-
         .field {
             display: flex;
             flex-direction: column;
         }
-
-        .field.full {
-            grid-column: 1 / -1;
-        }
-
+        .field.full { grid-column: 1 / -1; }
         .field label {
             font-size: 0.78rem;
             font-weight: 600;
@@ -159,8 +206,8 @@
             color: var(--text-muted);
             margin-bottom: 4px;
         }
-
         .field input,
+        .field select,
         .field textarea {
             padding: 9px 12px;
             border: 1px solid var(--border);
@@ -170,29 +217,26 @@
             background: #fafcfe;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-
         .field input:focus,
+        .field select:focus,
         .field textarea:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(0, 110, 161, 0.15);
             background: #fff;
         }
-
         .field textarea {
             resize: vertical;
             min-height: 56px;
         }
-
         .form-actions {
             grid-column: 1 / -1;
             display: flex;
             align-items: center;
             gap: 14px;
-            margin-top: 6px;
             flex-wrap: wrap;
+            margin-top: 4px;
         }
-
         .btn {
             background: var(--primary);
             color: #fff;
@@ -202,49 +246,31 @@
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            letter-spacing: 0.2px;
+            transition: background 0.2s;
         }
-
-        .btn:hover {
-            background: var(--primary-light);
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-        }
-
+        .btn:hover { background: var(--primary-light); }
         .btn:disabled {
             background: #a0b4c8;
             cursor: not-allowed;
-            transform: none;
         }
-
         #status {
             font-size: 0.85rem;
             font-weight: 500;
         }
+        #status.ok { color: #1a7a4a; }
+        #status.err { color: #b13e3e; }
 
-        #status.ok {
-            color: #1a7a4a;
-        }
-
-        #status.err {
-            color: #b13e3e;
-        }
-
+        /* ----- TABLE ----- */
         .table-wrap {
             overflow-x: auto;
-            margin-top: 2px;
+            margin-top: 10px;
         }
-
         .table-wrap table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.82rem;
-            min-width: 480px;
+            min-width: 700px;
         }
-
         .table-wrap th,
         .table-wrap td {
             border: 1px solid var(--border);
@@ -252,30 +278,33 @@
             text-align: left;
             vertical-align: top;
         }
-
         .table-wrap th {
-            background: var(--table-header-bg);
+            background: var(--table-header-bg, #e8eef6);
             color: var(--primary);
             font-weight: 600;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.4px;
         }
-
-        .table-wrap tr:nth-child(even) {
-            background: #f8faff;
-        }
-
-        .table-wrap tr:hover {
-            background: #eef4fb;
-        }
-
+        .table-wrap tr:nth-child(even) { background: #f8faff; }
+        .table-wrap tr:hover { background: #eef4fb; }
         .empty-state {
             color: var(--text-muted);
             font-size: 0.85rem;
             padding: 12px 0 4px 0;
         }
 
+        .month-select {
+            padding: 7px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            font-family: inherit;
+            background: #fafcfe;
+            margin-bottom: 8px;
+        }
+
+        /* ----- EMBED IFRAME ----- */
         .sheet-frame {
             width: 100%;
             height: 560px;
@@ -285,303 +314,283 @@
             display: block;
         }
 
-        .month-select {
-            margin-bottom: 12px;
-            padding: 7px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            font-size: 0.85rem;
-            font-family: inherit;
-            background: #fafcfe;
-            color: var(--text);
+        /* ----- RESPONSIVE ----- */
+        @media (max-width: 768px) {
+            .main-content { padding: 12px; }
+            form { grid-template-columns: 1fr; }
+            .field.full { grid-column: 1; }
+            .form-actions { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; text-align: center; }
+            .sheet-frame { height: 300px; }
+            .topbar h1 { font-size: 1.0rem; }
+            .topbar .sub { display: none; }
+            .drawer { width: 220px; }
         }
-
-        @media (min-width: 1024px) {
-            body {
-                padding: 28px 32px;
-            }
-
-            .main-grid {
-                grid-template-columns: 1.4fr 1fr;
-                gap: 24px;
-            }
-
-            .left-col {
-                display: flex;
-                flex-direction: column;
-                gap: 22px;
-            }
-
-            .right-col {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .right-col .card {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .right-col .card .card-title {
-                flex-shrink: 0;
-            }
-
-            .right-col .sheet-frame {
-                flex: 1;
-                min-height: 420px;
-                height: auto;
-            }
-
-            .card {
-                padding: 18px 22px;
-            }
-
-            form {
-                gap: 12px 18px;
-            }
-
-            .page-header h1 {
-                font-size: 1.6rem;
-            }
-        }
-
-        @media (min-width: 1400px) {
-            .main-grid {
-                grid-template-columns: 1.5fr 1fr;
-                gap: 28px;
-            }
-
-            .card {
-                padding: 24px 30px;
-            }
-
-            .sheet-frame {
-                min-height: 480px;
-            }
-        }
-
-        @media (max-width: 1023px) {
-            .left-col,
-            .right-col {
-                display: contents;
-            }
-
-            .sheet-frame {
-                height: 420px;
-            }
-
-            .card {
-                padding: 16px 18px;
-            }
-
-            form {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .field.full {
-                grid-column: 1;
-            }
-
-            .form-actions {
-                grid-column: 1;
-                flex-wrap: wrap;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .page-header h1 {
-                font-size: 1.25rem;
-            }
-
-            .setup-banner {
-                font-size: 0.78rem;
-                padding: 10px 14px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 12px;
-            }
-
-            .card {
-                padding: 14px 14px;
-            }
-
-            .sheet-frame {
-                height: 300px;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-                text-align: center;
-            }
-
-            .form-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            #status {
-                text-align: center;
-                padding: 4px 0;
-            }
-        }
-
-        .accent-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent);
-            margin-right: 6px;
+        @media (min-width: 769px) {
+            .sheet-frame { height: 480px; }
         }
     </style>
 </head>
 <body>
-    <div class="wrap">
 
-        <div class="page-header">
-            <div>
-                <h1>📋 Transaction Receiving Log</h1>
-                <span class="sub">Log incoming transactions · routed automatically to the matching month tab</span>
-            </div>
-            <div class="header-line">
-                <span style="font-size:0.75rem;color:var(--text-muted);background:var(--table-header-bg);padding:2px 12px;border-radius:20px;font-weight:500;">
-                    <span class="accent-dot"></span> Live
-                </span>
+    <!-- TOP BAR -->
+    <header class="topbar">
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+        <h1>📋 Transaction Log</h1>
+        <span class="sub">Receiving · Routing</span>
+    </header>
+
+    <!-- DRAWER OVERLAY -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+
+    <!-- DRAWER -->
+    <nav class="drawer" id="drawer">
+        <div class="drawer-header">📌 Navigation</div>
+        <ul class="drawer-nav">
+            <li class="active" data-view="add"><span class="icon">✏️</span> Add Transaction</li>
+            <li data-view="sheet"><span class="icon">📄</span> Embedded Sheet</li>
+            <li data-view="recent"><span class="icon">📊</span> Recent Entries</li>
+        </ul>
+        <div class="drawer-close" id="drawerClose">✕ Close</div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <!-- VIEW: Add Transaction -->
+        <div id="view-add" class="view-section active">
+            <div class="card">
+                <div class="card-title"><span>✏️ New Transaction</span><span class="badge">required</span></div>
+                <form id="txnForm">
+                    <div class="field">
+                        <label for="controlNo">Control No.</label>
+                        <input type="text" id="controlNo" placeholder="e.g. 2026-001" required>
+                    </div>
+                    <div class="field">
+                        <label for="date">Date</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="field">
+                        <label for="received">Received</label>
+                        <input type="text" id="received" placeholder="e.g. John Doe" required>
+                    </div>
+                    <div class="field">
+                        <label for="office">Office</label>
+                        <input type="text" id="office" placeholder="e.g. Records Section" required>
+                    </div>
+                    <div class="field full">
+                        <label for="eventSubject">Event / Subject</label>
+                        <input type="text" id="eventSubject" placeholder="Brief description" required>
+                    </div>
+                    <div class="field">
+                        <label for="dateOfEvent">Date of Event / Accomplished</label>
+                        <input type="date" id="dateOfEvent">
+                    </div>
+                    <div class="field">
+                        <label for="officerInCharge">Officer in Charge</label>
+                        <input type="text" id="officerInCharge" placeholder="Name" required>
+                    </div>
+                    <div class="field">
+                        <label for="classification">Classification</label>
+                        <select id="classification">
+                            <option value="simple">Simple</option>
+                            <option value="complex">Complex</option>
+                            <option value="HT">HT</option>
+                        </select>
+                    </div>
+                    <div class="field full">
+                        <label for="remarks">Remarks</label>
+                        <textarea id="remarks" placeholder="Optional notes"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn" id="submitBtn">Submit</button>
+                        <span id="status"></span>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="setup-banner">
-            <span style="font-size:1.1rem;">⚙️</span>
-            <span><strong>Config check:</strong> make sure <code>APPS_SCRIPT_URL</code> below is your latest deployed <code>/exec</code> URL, and that you redeployed after any Code.gs change.</span>
+        <!-- VIEW: Embedded Sheet -->
+        <div id="view-sheet" class="view-section">
+            <div class="card" style="padding:0; border:none; box-shadow:none; background:transparent;">
+                <!-- iframe src will be set by JavaScript -->
+                <iframe id="sheetFrame" class="sheet-frame" src="" title="Google Sheet" loading="lazy"></iframe>
+            </div>
         </div>
 
-        <div class="main-grid">
-
-            <div class="left-col">
-
-                <div class="card">
-                    <div class="card-title">
-                        <span>✏️ New Transaction</span>
-                        <span class="badge">required</span>
-                    </div>
-                    <form id="txnForm">
-                        <div class="field">
-                            <label for="trackingCode">Tracking Code</label>
-                            <input type="text" id="trackingCode" placeholder="e.g. TC-2026-0001" required>
-                        </div>
-                        <div class="field">
-                            <label for="date">Date</label>
-                            <input type="date" id="date" required>
-                        </div>
-                        <div class="field">
-                            <label for="receivingOffice">Receiving Office</label>
-                            <input type="text" id="receivingOffice" placeholder="e.g. Records Section" required>
-                        </div>
-                        <div class="field">
-                            <label for="dateTransmitted">Date Transmitted</label>
-                            <input type="date" id="dateTransmitted">
-                        </div>
-                        <div class="field full">
-                            <label for="subject">Subject</label>
-                            <input type="text" id="subject" placeholder="Brief description of the document / transaction" required>
-                        </div>
-                        <div class="field full">
-                            <label for="remarks">Remarks</label>
-                            <textarea id="remarks" placeholder="Optional notes"></textarea>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn" id="submitBtn">Submit Transaction</button>
-                            <span id="status"></span>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">
-                        <span>📊 Recent Entries</span>
-                        <span class="badge" style="background:var(--primary-light);">live</span>
-                    </div>
-                    <select id="monthSelect" class="month-select">
-                        <option>January</option><option>February</option><option>March</option>
-                        <option>April</option><option>May</option><option>June</option>
-                        <option>July</option><option>August</option><option>September</option>
-                        <option>October</option><option>November</option><option>December</option>
-                    </select>
-                    <div class="table-wrap" id="tableWrap">
-                        <p class="empty-state">Recent entries will appear here once configured.</p>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="right-col">
-                <div class="card" style="display:flex;flex-direction:column;">
-                    <div class="card-title">
-                        <span>📄 Google Sheet</span>
-                        <span class="badge" style="background:var(--accent);">embedded</span>
-                    </div>
-                    <iframe id="sheetFrame" class="sheet-frame" src="" title="Google Sheet Embed" loading="lazy"></iframe>
+        <!-- VIEW: Recent Entries -->
+        <div id="view-recent" class="view-section">
+            <div class="card">
+                <div class="card-title"><span>📊 Recent Entries</span><span class="badge" style="background:var(--primary-light);">live</span></div>
+                <select id="monthSelect" class="month-select">
+                    <option>January</option><option>February</option><option>March</option>
+                    <option>April</option><option>May</option><option>June</option>
+                    <option>July</option><option>August</option><option>September</option>
+                    <option>October</option><option>November</option><option>December</option>
+                </select>
+                <div class="table-wrap" id="tableWrap">
+                    <p class="empty-state">Select a month to view entries.</p>
                 </div>
             </div>
-
         </div>
 
     </div>
 
     <script>
-        // ===================== CONFIG — EDIT THESE TWO LINES =====================
+        // ===================== CONFIG =====================
         const CONFIG = {
-            // The /exec URL from Deploy > Manage deployments in Apps Script
             APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxZ9hyyIAARTbCQfJtdJtDDTZOzaA92Ekly-xTc-R7pASMVgflvbGBp4JMCwxgKp6autw/exec",
-
-            // Your Google Sheet's "publish to web" embed URL
             SHEET_EMBED_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQngikkeSs_zBi5__YQAd-CkSyFVWcLs7ctHuhu3gIzY-ZHgOePer_Ztm4KTSHDmXdyU9WiQOOXjOzo/pubhtml?widget=true&headers=false"
         };
-        // ===========================================================================
+        // ==================================================
 
-        // Wait for the DOM to be fully loaded before accessing elements
         document.addEventListener('DOMContentLoaded', function() {
-            const MONTHS = ["January","February","March","April","May","June",
-                             "July","August","September","October","November","December"];
 
-            const currentMonth = MONTHS[new Date().getMonth()];
+            // ---------- DRAWER ----------
+            const drawer = document.getElementById('drawer');
+            const overlay = document.getElementById('drawerOverlay');
+            const hamburger = document.getElementById('hamburgerBtn');
+            const closeBtn = document.getElementById('drawerClose');
+            const navItems = document.querySelectorAll('.drawer-nav li');
 
-            // Set up the embedded sheet
+            function openDrawer() {
+                drawer.classList.add('open');
+                overlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeDrawer() {
+                drawer.classList.remove('open');
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+
+            hamburger.addEventListener('click', openDrawer);
+            closeBtn.addEventListener('click', closeDrawer);
+            overlay.addEventListener('click', closeDrawer);
+
+            // ---------- VIEW SWITCHING ----------
+            const views = {
+                add: document.getElementById('view-add'),
+                sheet: document.getElementById('view-sheet'),
+                recent: document.getElementById('view-recent')
+            };
+
+            // Pre‑load the embedded sheet iframe
             const sheetFrame = document.getElementById('sheetFrame');
-            if (sheetFrame) {
+            if (sheetFrame && CONFIG.SHEET_EMBED_URL) {
+                // Set src immediately so it loads when the view is shown
                 sheetFrame.src = CONFIG.SHEET_EMBED_URL;
             }
 
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const view = this.dataset.view; // 'add', 'sheet', 'recent'
+                    // update active nav
+                    navItems.forEach(li => li.classList.remove('active'));
+                    this.classList.add('active');
+                    // show correct view
+                    Object.keys(views).forEach(key => {
+                        views[key].classList.toggle('active', key === view);
+                    });
+                    closeDrawer();
+
+                    // If switching to sheet, ensure iframe has src (already set, but just in case)
+                    if (view === 'sheet') {
+                        const frame = document.getElementById('sheetFrame');
+                        if (frame && !frame.src) {
+                            frame.src = CONFIG.SHEET_EMBED_URL;
+                        }
+                    }
+                    if (view === 'recent') {
+                        const monthSelect = document.getElementById('monthSelect');
+                        loadTable(monthSelect ? monthSelect.value : currentMonth());
+                    }
+                });
+            });
+
+            // ---------- HELPERS ----------
+            const MONTHS = ["January","February","March","April","May","June",
+                           "July","August","September","October","November","December"];
+            function currentMonth() {
+                return MONTHS[new Date().getMonth()];
+            }
+
+            // ---------- FORM SUBMISSION ----------
             const form = document.getElementById('txnForm');
             const statusEl = document.getElementById('status');
             const submitBtn = document.getElementById('submitBtn');
-            const monthSelect = document.getElementById('monthSelect');
-            const tableWrap = document.getElementById('tableWrap');
 
-            // Helper to safely get a field value
             function getVal(id) {
                 const el = document.getElementById(id);
                 return el ? el.value.trim() : '';
             }
 
-            // Helper to get month name from date string
-            function monthNameFromDate(dateStr) {
-                if (!dateStr) return currentMonth;
+            function monthFromDate(dateStr) {
+                if (!dateStr) return currentMonth();
                 const parts = dateStr.split("-");
-                const month = parseInt(parts[1], 10);
-                return MONTHS[month - 1] || currentMonth;
+                const m = parseInt(parts[1], 10);
+                return MONTHS[m-1] || currentMonth();
             }
 
-            // Function to load the table for a given month
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const dateVal = document.getElementById('date')?.value || '';
+                const payload = {
+                    controlNo: getVal('controlNo'),
+                    date: dateVal,
+                    received: getVal('received'),
+                    office: getVal('office'),
+                    eventSubject: getVal('eventSubject'),
+                    dateOfEvent: document.getElementById('dateOfEvent')?.value || '',
+                    officerInCharge: getVal('officerInCharge'),
+                    classification: document.getElementById('classification')?.value || 'simple',
+                    remarks: getVal('remarks'),
+                    sheetName: monthFromDate(dateVal)
+                };
+
+                if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
+                    statusEl.textContent = "⚠️ Set your Apps Script URL in CONFIG.";
+                    statusEl.className = "err";
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                statusEl.textContent = "Saving…";
+                statusEl.className = "";
+
+                try {
+                    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await res.json();
+                    if (result.status === "success") {
+                        statusEl.textContent = `✅ Saved to ${result.sheet}!`;
+                        statusEl.className = "ok";
+                        form.reset();
+                        // Refresh recent entries if that view is active
+                        const activeView = document.querySelector('.drawer-nav li.active');
+                        if (activeView && activeView.dataset.view === 'recent') {
+                            const monthSelect = document.getElementById('monthSelect');
+                            loadTable(monthSelect ? monthSelect.value : currentMonth());
+                        }
+                    } else {
+                        throw new Error(result.message || "Unknown error");
+                    }
+                } catch (err) {
+                    statusEl.textContent = "❌ Failed: " + err.message;
+                    statusEl.className = "err";
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // ---------- RECENT ENTRIES ----------
+            const monthSelect = document.getElementById('monthSelect');
+            const tableWrap = document.getElementById('tableWrap');
+
             async function loadTable(monthName) {
                 if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) return;
                 if (!tableWrap) return;
@@ -590,10 +599,11 @@
                     const res = await fetch(url);
                     const rows = await res.json();
                     if (!Array.isArray(rows) || rows.length === 0) {
-                        tableWrap.innerHTML = `<p class="empty-state">No entries yet in ${monthName}.</p>`;
+                        tableWrap.innerHTML = `<p class="empty-state">No entries in ${monthName}.</p>`;
                         return;
                     }
-                    const headers = ["Tracking Code", "Date", "Receiving Office", "Subject", "Date Transmitted", "Remarks"];
+                    const headers = ["Control No.", "Date", "Received", "Office", "Event/Subject",
+                                     "Date of Event", "Officer in Charge", "Classification", "Remarks"];
                     let html = `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>`;
                     rows.slice().reverse().forEach(r => {
                         html += "<tr>" + r.map(c => `<td>${c ?? ""}</td>`).join("") + "</tr>";
@@ -601,77 +611,18 @@
                     html += "</tbody></table>";
                     tableWrap.innerHTML = html;
                 } catch (err) {
-                    tableWrap.innerHTML = `<p class="empty-state" style="color:#b13e3e;">Could not load log: ${err.message}</p>`;
+                    tableWrap.innerHTML = `<p class="empty-state" style="color:#b13e3e;">Error: ${err.message}</p>`;
                 }
             }
 
-            // Set up month select and load initial data
             if (monthSelect) {
-                monthSelect.value = currentMonth;
-                monthSelect.addEventListener('change', (e) => {
-                    loadTable(e.target.value);
-                });
-            } else {
-                console.warn('Month select element not found; using current month');
+                monthSelect.value = currentMonth();
+                monthSelect.addEventListener('change', (e) => loadTable(e.target.value));
+                // Load initial data for the current month (recent view may be inactive, but data will be ready)
+                loadTable(monthSelect.value);
             }
 
-            // Load initial table
-            loadTable(monthSelect ? monthSelect.value : currentMonth);
-
-            // Submit handler
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-
-                    const dateVal = document.getElementById('date')?.value || '';
-                    const payload = {
-                        trackingCode: getVal('trackingCode'),
-                        date: dateVal,
-                        receivingOffice: getVal('receivingOffice'),
-                        subject: getVal('subject'),
-                        dateTransmitted: document.getElementById('dateTransmitted')?.value || '',
-                        remarks: getVal('remarks'),
-                        sheetName: monthNameFromDate(dateVal)
-                    };
-
-                    if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
-                        statusEl.textContent = "⚠️ Set your Apps Script URL in the CONFIG block.";
-                        statusEl.className = "err";
-                        return;
-                    }
-
-                    submitBtn.disabled = true;
-                    statusEl.textContent = "Saving…";
-                    statusEl.className = "";
-
-                    try {
-                        const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
-                            method: "POST",
-                            headers: { "Content-Type": "text/plain;charset=utf-8" },
-                            body: JSON.stringify(payload)
-                        });
-                        const result = await res.json();
-
-                        if (result.status === "success") {
-                            statusEl.textContent = `✅ Saved to ${result.sheet}!`;
-                            statusEl.className = "ok";
-                            form.reset();
-                            // Reload the table for the currently selected month
-                            const selectedMonth = monthSelect ? monthSelect.value : currentMonth;
-                            loadTable(selectedMonth);
-                        } else {
-                            throw new Error(result.message || "Unknown error");
-                        }
-                    } catch (err) {
-                        statusEl.textContent = "❌ Failed: " + err.message;
-                        statusEl.className = "err";
-                    } finally {
-                        submitBtn.disabled = false;
-                    }
-                });
-            }
         });
     </script>
-
 </body>
 </html>
