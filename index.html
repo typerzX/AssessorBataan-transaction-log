@@ -84,7 +84,7 @@
         .drawer {
             position: fixed;
             top: 0;
-            left: calc(-1 * var(--drawer-width));   /* fixed: hidden by default */
+            left: calc(-1 * var(--drawer-width));
             width: var(--drawer-width);
             height: 100%;
             background: var(--card-bg);
@@ -413,7 +413,6 @@
         <!-- VIEW: Embedded Sheet -->
         <div id="view-sheet" class="view-section">
             <div class="card" style="padding:0; border:none; box-shadow:none; background:transparent;">
-                <!-- iframe src will be set by JavaScript -->
                 <iframe id="sheetFrame" class="sheet-frame" src="" title="Google Sheet" loading="lazy"></iframe>
             </div>
         </div>
@@ -439,7 +438,7 @@
     <script>
         // ===================== CONFIG =====================
         const CONFIG = {
-            APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbydQlEjNOMCf_NQcnpsDImUU7AYkD7OWX66PszUtPL_RNVPAQkWxCbdnW8qzng9c0Fu8w/exec",
+            APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzRbaK9lMeBvT89RlsQoKscVV_r-WFW2bGbjg70NoxO7ub4Ega8CI7ywEAH8AK-5IJJsA/exec",
             SHEET_EMBED_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQngikkeSs_zBi5__YQAd-CkSyFVWcLs7ctHuhu3gIzY-ZHgOePer_Ztm4KTSHDmXdyU9WiQOOXjOzo/pubhtml?widget=true&headers=false"
         };
         // ==================================================
@@ -478,23 +477,19 @@
             // Pre‑load the embedded sheet iframe
             const sheetFrame = document.getElementById('sheetFrame');
             if (sheetFrame && CONFIG.SHEET_EMBED_URL) {
-                // Set src immediately so it loads when the view is shown
                 sheetFrame.src = CONFIG.SHEET_EMBED_URL;
             }
 
             navItems.forEach(item => {
                 item.addEventListener('click', function() {
-                    const view = this.dataset.view; // 'add', 'sheet', 'recent'
-                    // update active nav
+                    const view = this.dataset.view;
                     navItems.forEach(li => li.classList.remove('active'));
                     this.classList.add('active');
-                    // show correct view
                     Object.keys(views).forEach(key => {
                         views[key].classList.toggle('active', key === view);
                     });
                     closeDrawer();
 
-                    // If switching to sheet, ensure iframe has src (already set, but just in case)
                     if (view === 'sheet') {
                         const frame = document.getElementById('sheetFrame');
                         if (frame && !frame.src) {
@@ -570,7 +565,6 @@
                         statusEl.textContent = `✅ Saved to ${result.sheet}!`;
                         statusEl.className = "ok";
                         form.reset();
-                        // Refresh recent entries if that view is active
                         const activeView = document.querySelector('.drawer-nav li.active');
                         if (activeView && activeView.dataset.view === 'recent') {
                             const monthSelect = document.getElementById('monthSelect');
@@ -618,7 +612,6 @@
             if (monthSelect) {
                 monthSelect.value = currentMonth();
                 monthSelect.addEventListener('change', (e) => loadTable(e.target.value));
-                // Load initial data for the current month (recent view may be inactive, but data will be ready)
                 loadTable(monthSelect.value);
             }
 
