@@ -32,7 +32,7 @@
             flex-direction: column;
         }
 
-        /* ----- TOP BAR (with hamburger) ----- */
+        /* ----- TOP BAR ----- */
         .topbar {
             background: var(--primary);
             color: #fff;
@@ -68,7 +68,7 @@
             margin-left: auto;
         }
 
-        /* ----- DRAWER (overlay) ----- */
+        /* ----- DRAWER ----- */
         .drawer-overlay {
             position: fixed;
             top: 0;
@@ -164,7 +164,7 @@
             display: block;
         }
 
-        /* ----- CARDS & FORM (shared) ----- */
+        /* ----- CARDS & FORM ----- */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -322,13 +322,12 @@
             min-width: 140px;
         }
 
-        /* ----- EMBED IFRAME (full page fit) ----- */
+        /* ----- EMBED IFRAME ----- */
         .sheet-frame-wrap {
             position: relative;
             width: 100%;
             height: 0;
             padding-bottom: 75%;
-            /* 4:3 ratio — adjust to taste */
             overflow: hidden;
             border-radius: 8px;
             border: 1px solid var(--border);
@@ -379,7 +378,6 @@
         @media (min-width: 769px) {
             .sheet-frame-wrap {
                 padding-bottom: 60%;
-                /* wider view on desktop */
             }
         }
     </style>
@@ -418,7 +416,7 @@
                     <span class="badge">required</span>
                 </div>
                 <form id="txnForm">
-                    <!-- Month Selector (new) -->
+                    <!-- Month Selector -->
                     <div class="field">
                         <label for="monthSelectAdd">📅 Month (sheet tab)</label>
                         <select id="monthSelectAdd" class="month-select" required>
@@ -437,35 +435,31 @@
                         </select>
                     </div>
                     <div class="field">
-                        <label for="controlNo">Control No.</label>
+                        <label for="controlNo">CONTROL NO.</label>
                         <input type="text" id="controlNo" placeholder="e.g. 2026-001" required>
                     </div>
                     <div class="field">
-                        <label for="date">Date Received</label>
+                        <label for="date">DATE RECEIVED</label>
                         <input type="date" id="date" required>
                     </div>
                     <div class="field">
-                        <label for="received">Received (from)</label>
-                        <input type="text" id="received" placeholder="e.g. John Doe" required>
-                    </div>
-                    <div class="field">
-                        <label for="office">Office</label>
+                        <label for="office">OFFICE</label>
                         <input type="text" id="office" placeholder="e.g. Records Section" required>
                     </div>
                     <div class="field full">
-                        <label for="eventSubject">Event / Subject</label>
+                        <label for="eventSubject">EVENT/SUBJECT</label>
                         <input type="text" id="eventSubject" placeholder="Brief description" required>
                     </div>
                     <div class="field">
-                        <label for="dateOfEvent">Date of Event / Accomplished</label>
+                        <label for="dateOfEvent">DATE OF EVENT / DATE ACCOMPLISHED</label>
                         <input type="date" id="dateOfEvent">
                     </div>
                     <div class="field">
-                        <label for="officerInCharge">Officer in Charge</label>
+                        <label for="officerInCharge">OFFICER IN CHARGE</label>
                         <input type="text" id="officerInCharge" placeholder="Name" required>
                     </div>
                     <div class="field">
-                        <label for="classification">Classification</label>
+                        <label for="classification">CLASSIFICATION</label>
                         <select id="classification">
                             <option value="simple">Simple</option>
                             <option value="complex">Complex</option>
@@ -473,7 +467,7 @@
                         </select>
                     </div>
                     <div class="field full">
-                        <label for="remarks">Remarks</label>
+                        <label for="remarks">REMARKS</label>
                         <textarea id="remarks" placeholder="Optional notes"></textarea>
                     </div>
                     <div class="form-actions">
@@ -484,7 +478,7 @@
             </div>
         </div>
 
-        <!-- VIEW: Embedded Sheet (full page fit) -->
+        <!-- VIEW: Embedded Sheet -->
         <div id="view-sheet" class="view-section">
             <div class="card" style="padding:0; border:none; box-shadow:none; background:transparent;">
                 <div class="sheet-frame-wrap">
@@ -564,7 +558,6 @@
                 recent: document.getElementById('view-recent')
             };
 
-            // Pre‑load the embedded sheet iframe (full page)
             const sheetFrame = document.getElementById('sheetFrame');
             if (sheetFrame && CONFIG.SHEET_EMBED_URL) {
                 sheetFrame.src = CONFIG.SHEET_EMBED_URL;
@@ -619,7 +612,6 @@
                 dateInput.value = today;
             }
 
-            // Set default month in the add form to current month
             const monthSelectAdd = document.getElementById('monthSelectAdd');
             if (monthSelectAdd) {
                 monthSelectAdd.value = currentMonth();
@@ -628,33 +620,24 @@
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // Gather all fields
                 const payload = {
                     controlNo: getVal('controlNo'),
                     date: getVal('date'),
-                    received: getVal('received'),
                     office: getVal('office'),
                     eventSubject: getVal('eventSubject'),
                     dateOfEvent: document.getElementById('dateOfEvent')?.value || '',
                     officerInCharge: getVal('officerInCharge'),
                     classification: document.getElementById('classification')?.value || 'simple',
                     remarks: getVal('remarks'),
-                    // Use the selected month from the dropdown
                     sheetName: monthSelectAdd ? monthSelectAdd.value : currentMonth()
                 };
 
                 // Validate required fields
-                if (!payload.controlNo || !payload.date || !payload.received || !payload.office ||
+                if (!payload.controlNo || !payload.date || !payload.office ||
                     !payload.eventSubject || !payload.officerInCharge) {
                     statusEl.textContent = "⚠️ Please fill in all required fields.";
                     statusEl.className = "err";
                     return;
-                }
-
-                // Warn if using the example URL, but don't block
-                if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR") ||
-                    CONFIG.APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbxqg3E6kaoGmSfe6a86jP6jQSOc3qU9ApV4ZyXIrVyDvTA028GaXqr2tsVtbWAANQdw/exec") {
-                    console.warn("Using example Apps Script URL — please replace with your own deployment.");
                 }
 
                 submitBtn.disabled = true;
@@ -672,7 +655,6 @@
                         statusEl.textContent = `✅ Saved to "${result.sheet}"!`;
                         statusEl.className = "ok";
                         form.reset();
-                        // Re-set default date and month after reset
                         if (dateInput) {
                             const today = new Date().toISOString().split('T')[0];
                             dateInput.value = today;
@@ -680,7 +662,6 @@
                         if (monthSelectAdd) {
                             monthSelectAdd.value = currentMonth();
                         }
-                        // Refresh recent entries if that view is active
                         const activeView = document.querySelector('.drawer-nav li.active');
                         if (activeView && activeView.dataset.view === 'recent') {
                             const monthSelect = document.getElementById('monthSelectRecent');
@@ -701,11 +682,10 @@
             const monthSelectRecent = document.getElementById('monthSelectRecent');
             const tableWrap = document.getElementById('tableWrap');
 
-            // These headers must match the spreadsheet EXACTLY (case-sensitive)
+            // These headers match the spreadsheet exactly (8 columns)
             const SPREADSHEET_HEADERS = [
-                "Control No.",
+                "CONTROL NO.",
                 "DATE RECEIVED",
-                "RECEIVED",
                 "OFFICE",
                 "EVENT/SUBJECT",
                 "DATE OF EVENT/DATE ACCOMPLISHED",
@@ -716,28 +696,21 @@
 
             async function loadTable(monthName) {
                 if (!tableWrap) return;
-
-                // Instead of showing a warning, just try to fetch.
-                // If the URL is the example one, the fetch will fail gracefully.
                 try {
                     const url =
                         `${CONFIG.APPS_SCRIPT_URL}?sheet=${encodeURIComponent(monthName)}&t=${Date.now()}`;
                     const res = await fetch(url);
-
-                    // If response is not OK, show a friendly error
                     if (!res.ok) {
                         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                     }
-
                     const rows = await res.json();
 
                     if (!Array.isArray(rows) || rows.length === 0) {
                         tableWrap.innerHTML =
-                        `<p class="empty-state">📭 No entries in <strong>${monthName}</strong>.</p>`;
+                            `<p class="empty-state">📭 No entries in <strong>${monthName}</strong>.</p>`;
                         return;
                     }
 
-                    // Build table with the exact spreadsheet headers
                     let html = `<table><thead><tr>`;
                     SPREADSHEET_HEADERS.forEach(h => {
                         html += `<th>${h}</th>`;
@@ -761,7 +734,6 @@
                     html += `</tbody></table>`;
                     tableWrap.innerHTML = html;
                 } catch (err) {
-                    // Show a clear error message with guidance
                     tableWrap.innerHTML =
                         `<p class="empty-state" style="color:#b13e3e;">❌ Could not load data from <strong>${monthName}</strong>. Please check your Apps Script URL and ensure the spreadsheet is published.</p>`;
                     console.error("loadTable error:", err.message);
@@ -771,7 +743,6 @@
             if (monthSelectRecent) {
                 monthSelectRecent.value = currentMonth();
                 monthSelectRecent.addEventListener('change', (e) => loadTable(e.target.value));
-                // Load initial data
                 loadTable(monthSelectRecent.value);
             }
 
