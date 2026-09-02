@@ -389,7 +389,7 @@
     <!-- TOP BAR -->
     <header class="topbar">
         <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
-        <h1>📋 Transaction Log</h1>
+        <h1>Bataan Assessor Transaction Log</h1>
         <span class="sub">Receiving · Routing</span>
     </header>
 
@@ -401,7 +401,7 @@
         <div class="drawer-header">📌 Navigation</div>
         <ul class="drawer-nav">
             <li class="active" data-view="add"><span class="icon">✏️</span> Add Transaction</li>
-            <li data-view="sheet"><span class="icon">📄</span> Embedded Sheet</li>
+            <li data-view="sheet"><span class="icon">📄</span> Google SpreadSheet</li>
             <li data-view="recent"><span class="icon">📊</span> Recent Entries</li>
         </ul>
         <div class="drawer-close" id="drawerClose">✕ Close</div>
@@ -651,12 +651,9 @@
                     return;
                 }
 
-                if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR") || CONFIG.APPS_SCRIPT_URL.includes(
-                        "script.google.com/macros/s/AKfycbxZ9hyyIAARTbCQfJtdJtDDTZOzaA92Ekly-xTc-R7pASMVgflvbGBp4JMCwxgKp6autw/exec") &&
-                    CONFIG.APPS_SCRIPT_URL.includes("AKfycbxZ9hyyIAARTbCQfJtdJtDDTZOzaA92Ekly-xTc-R7pASMVgflvbGBp4JMCwxgKp6autw")
-                    ) {
-                    // This is the example URL — warn the user to replace it.
-                    // We'll still attempt the fetch, but it will likely fail.
+                // Warn if using the example URL, but don't block
+                if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR") ||
+                    CONFIG.APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbxZ9hyyIAARTbCQfJtdJtDDTZOzaA92Ekly-xTc-R7pASMVgflvbGBp4JMCwxgKp6autw/exec") {
                     console.warn("Using example Apps Script URL — please replace with your own deployment.");
                 }
 
@@ -719,21 +716,24 @@
 
             async function loadTable(monthName) {
                 if (!tableWrap) return;
-                if (CONFIG.APPS_SCRIPT_URL.includes("PASTE_YOUR") || CONFIG.APPS_SCRIPT_URL.includes(
-                        "script.google.com/macros/s/AKfycbxZ9hyyIAARTbCQfJtdJtDDTZOzaA92Ekly-xTc-R7pASMVgflvbGBp4JMCwxgKp6autw")
-                    ) {
-                    tableWrap.innerHTML =
-                        `<p class="empty-state">⚠️ Please set your actual Apps Script URL in CONFIG.</p>`;
-                    return;
-                }
+
+                // Instead of showing a warning, just try to fetch.
+                // If the URL is the example one, the fetch will fail gracefully.
                 try {
                     const url =
                         `${CONFIG.APPS_SCRIPT_URL}?sheet=${encodeURIComponent(monthName)}&t=${Date.now()}`;
                     const res = await fetch(url);
+
+                    // If response is not OK, show a friendly error
+                    if (!res.ok) {
+                        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                    }
+
                     const rows = await res.json();
 
                     if (!Array.isArray(rows) || rows.length === 0) {
-                        tableWrap.innerHTML = `<p class="empty-state">📭 No entries in <strong>${monthName}</strong>.</p>`;
+                        tableWrap.innerHTML =
+                        `<p class="empty-state">📭 No entries in <strong>${monthName}</strong>.</p>`;
                         return;
                     }
 
@@ -747,9 +747,7 @@
                     // Show newest first (reverse order)
                     const reversed = rows.slice().reverse();
                     reversed.forEach(row => {
-                        // Ensure we have exactly as many cells as headers
                         const cells = Array.isArray(row) ? row : [];
-                        // Pad or trim to match header count
                         while (cells.length < SPREADSHEET_HEADERS.length) {
                             cells.push('');
                         }
@@ -763,8 +761,10 @@
                     html += `</tbody></table>`;
                     tableWrap.innerHTML = html;
                 } catch (err) {
+                    // Show a clear error message with guidance
                     tableWrap.innerHTML =
-                        `<p class="empty-state" style="color:#b13e3e;">❌ Error loading data: ${err.message}</p>`;
+                        `<p class="empty-state" style="color:#b13e3e;">❌ Could not load data from <strong>${monthName}</strong>. Please check your Apps Script URL and ensure the spreadsheet is published.</p>`;
+                    console.error("loadTable error:", err.message);
                 }
             }
 
